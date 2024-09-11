@@ -1,12 +1,12 @@
 import Foundation
 import Combine
 
-protocol Networkable {
+public protocol Networkable {
     static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers?, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void)
 }
 
-public struct NetworkableService: Networkable {
-    public static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers? = nil, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void) {
+public extension Networkable {
+    static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers? = nil, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void) {
         guard let requestURL = endpoint.url else {
             resultHandler(.failure(.invalidURL))
             return
