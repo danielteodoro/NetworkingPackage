@@ -3,5 +3,4 @@ enum NetworkError: Error {
     case emptyData
     case decoderError(error: Error)
     case responseError(error: Error)
-    case unexpectedStatusCode
 }
