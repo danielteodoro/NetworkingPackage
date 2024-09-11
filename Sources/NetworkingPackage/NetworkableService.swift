@@ -5,7 +5,7 @@ protocol Networkable {
     static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers?, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void)
 }
 
-class NetworkableService: Networkable {
+public struct NetworkableService: Networkable {
     static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers? = nil, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void) {
         guard let requestURL = endpoint.url else {
             resultHandler(.failure(.invalidURL))

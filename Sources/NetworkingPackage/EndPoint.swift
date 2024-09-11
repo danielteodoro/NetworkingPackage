@@ -13,7 +13,7 @@ public protocol EndPoint {
     var queryParams: [URLQueryItem]? { get }
 }
 
-extension EndPoint {
+public extension EndPoint {
     var headers: Headers {
         [ "Content-Type": "application/json" ]
     }
