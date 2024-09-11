@@ -18,14 +18,10 @@ public extension EndPoint {
         [ "Content-Type": "application/json" ]
     }
     
-    var query: [URLQueryItem]? {
-        return nil
-    }
-    
     var url: URL? {
         var url = api.baseURL()?.appendingPathComponent(path)
         
-        if let query = query {
+        if let query = queryParams {
             url = url?.appending(queryItems: query)
         }
         
