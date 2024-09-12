@@ -2,14 +2,13 @@ import Foundation
 import Combine
 
 public protocol Networkable {
-    static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers?, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void)
+    static func sendRequest<T: Decodable>(type: T.Type, endpoint: EndPoint, headers: Headers?) async throws -> T
 }
 
 public extension Networkable {
-    static func sendRequest<T: Decodable>(endpoint: EndPoint, headers: Headers? = nil, with class: T.Type, resultHandler: @escaping (Result<T, NetworkError>) -> Void) {
+    static func sendRequest<T: Decodable>(type: T.Type, endpoint: EndPoint, headers: Headers? = nil) async throws -> T  {
         guard let requestURL = endpoint.url else {
-            resultHandler(.failure(.invalidURL))
-            return
+            throw NetworkError.invalidURL
         }
         
         var request = URLRequest(url: requestURL)
@@ -24,33 +23,38 @@ public extension Networkable {
                 request.httpBody = jsonData
             }
         }
+        let downloader: HTTPDataDownloader = URLSession.shared
+        let data = try await downloader.httpData(for: request)
+        let decoder = JSONDecoder()
         
-        let config = URLSessionConfiguration.default
-        let session = URLSession(configuration: config)
-        session.dataTask(with: request) { (responseData, response, responseError) in
-            if let error = responseError {
-                DispatchQueue.main.async {
-                    resultHandler(.failure(.responseError(error: error)))
-                }
-            } else if let jsonData = responseData {
-                let decoder = JSONDecoder()
-                
-                do {
-                    let response = try decoder.decode(T.self, from: jsonData)
-                    DispatchQueue.main.async {
-                        resultHandler(.success(response))
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        resultHandler(.failure(.decoderError(error: error)))
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    resultHandler(.failure(.emptyData))
-                }
-            }
-            
-        }.resume()
+        return try decoder.decode(T.self, from: data)
+        
+//        let config = URLSessionConfiguration.default
+//        let session = URLSession(configuration: config)
+//        session.dataTask(with: request) { (responseData, response, responseError) in
+//            if let error = responseError {
+//                DispatchQueue.main.async {
+//                    resultHandler(.failure(.responseError))
+//                }
+//            } else if let jsonData = responseData {
+//                let decoder = JSONDecoder()
+//                
+//                do {
+//                    let response = try decoder.decode(T.self, from: jsonData)
+//                    DispatchQueue.main.async {
+//                        resultHandler(.success(response))
+//                    }
+//                } catch {
+//                    DispatchQueue.main.async {
+//                        resultHandler(.failure(.decoderError(error: error)))
+//                    }
+//                }
+//            } else {
+//                DispatchQueue.main.async {
+//                    resultHandler(.failure(.emptyData))
+//                }
+//            }
+//            
+//        }.resume()
     }
 }
